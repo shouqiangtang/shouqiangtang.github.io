@@ -21,8 +21,8 @@ tags: 快速排序,golang,算法
 package quicksort
 
 // 4, 6, 7, 8, 3, 1, 2, 5 -> 4
-// pivot = 0, index = 1
-// i, arr[i] < arr[pivot], index,   arr
+// pivot = arr[0] = 4, index = 1
+// i, arr[i] < pivot,      index,   arr
 // 1  6 < 4 == false       1        (4,6,7,8,3,1,2,5)
 // 2  7 < 4 == false       1        (4,6,7,8,3,1,2,5)
 // 3  8 < 4 == false       1        (4,6,7,8,3,1,2,5)
@@ -30,7 +30,7 @@ package quicksort
 // 5  1 < 4 == true        3        (4,3,1,8,6,7,2,5)
 // 6  2 < 4 == true        4        (4,3,1,2,6,7,8,5)
 // 7  5 < 4 == false       4        (4,3,1,2,6,7,8,5)
-// swap(arr, prvot, index-1) => (4,3,1,2,6,7,8,5) -> (2,3,1,4,6,7,8,5)
+// swap(arr, 0, index-1) => (4,3,1,2,6,7,8,5) -> (2,3,1,4,6,7,8,5)
 //
 // 分区算法1
 // 算法描述：该算法关键是定义一个index变量，index指向第一个大于pivot的位置或者指向
