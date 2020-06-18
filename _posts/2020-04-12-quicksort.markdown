@@ -35,16 +35,16 @@ package quicksort
 // 分区算法1
 // 算法描述：该算法关键是定义一个index变量，index指向第一个大于pivot的位置或者指向
 // 数组的末尾（数组中pivot最大）
-func partition(arr *[]int, left, right int) int {
-	pivot := (*arr)[left] // 设定基准值（pivot）
+func partition(arr []int, left, right int) int {
+	pivot := arr[left] // 设定基准值（pivot）
 	index := left + 1
 	for i := index; i <= right; i++ {
-		if (*arr)[i] < pivot {
-			(*arr)[i], (*arr)[index] = (*arr)[index], (*arr)[i]
+		if arr[i] < pivot {
+			arr[i], arr[index] = arr[index], arr[i]
 			index++
 		}
 	}
-	(*arr)[left], (*arr)[index-1] = (*arr)[index-1], (*arr)[left]
+	arr[left], arr[index-1] = arr[index-1], arr[left]
 	return index - 1
 }
 
@@ -54,24 +54,24 @@ func partition(arr *[]int, left, right int) int {
 // 2.将左指针所指值与pivot比较，如果左指针(left)所指关键字小于等于pivot，则左指针右移(left++)；否则将左指针的值赋给右指针
 // 3.重复执行1，2直到left大于等于right
 // 4.最后将pivot值赋给left
-func partition2(arr *[]int, left, right int) int {
-	pivot := (*arr)[left] // 设定基准值（pivot）
+func partition2(arr []int, left, right int) int {
+	pivot := arr[left] // 设定基准值（pivot）
 	for left < right {
-		for left < right && (*arr)[right] >= pivot {
+		for left < right && arr[right] >= pivot {
 			right--
 		}
-		(*arr)[left] = (*arr)[right]
-		for left < right && (*arr)[left] <= pivot {
+		arr[left] = arr[right]
+		for left < right && arr[left] <= pivot {
 			left++
 		}
-		(*arr)[right] = (*arr)[left]
+		arr[right] = arr[left]
 	}
-	(*arr)[left] = pivot
+	arr[left] = pivot
 	return left
 }
 
 // QuickSort : 快速排序
-func QuickSort(arr *[]int, left, right int) {
+func QuickSort(arr []int, left, right int) {
 	if left >= right {
 		return
 	}
