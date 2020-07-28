@@ -38,7 +38,7 @@ RabbitMQ对于发送到queue和exchange的消息的顺序几乎没有保证。�
 
 一旦返回一条消息，另一个使用者就可以将其拾取进行处理，即使它已经使用了以后的消息。 因此，消费者组无序处理消息，如下图所示：
 
-![An example of lost message ordering when using RabbitMQ](an_example_of_lost_message_ordering_when_using_RabbitMQ.png)
+![An example of lost message ordering when using RabbitMQ](/assets/an_example_of_lost_message_ordering_when_using_RabbitMQ.png)
 
 当然，我们可以通过将消费者并发限制为一个来确保RabbitMQ中的消息顺序。 更确切地说，单个消费者内的线程数应限制为一个，因为任何并行消息处理都可能导致的乱序问题。但是限制为一个单线程使用者会严重影响我们随着系统增长而扩展消息处理的能力。因此，我们不应该轻易的进行这种折中。
 
@@ -70,11 +70,33 @@ RabbitMQ提供了有关队列消息计时的各种功能：
 
 ### 消息生存时间(Message Time-To-Live (TTL))
 
-TTL属性可以与发送到RabbitMQ的每条消息相关联。TTL设置直接由发布者完成，也可以在队列本身上设置策略来完成。指定TTL允许系统限制消息的有效期限。如果消费者没在适当的时候对其进行处理，则会将其自动从队列中删除（并转移到死信交换dead-letter exchange，但稍后会进行更多处理）。TTL对于时间敏感的命令特别有用，这些命令在经过一段时间而不进行处理后变得无关紧要。
+发送到RabbitMQ的每条消息都可关联TTL属性。TTL设置可直接由发布者设置，也可通过策略在队列上设置。
+
+指定TTL可限制消息的有效期限。如果消费者没在有效期内消费，则该消息将会自动从队列中删除（并转移到死信交换dead-letter exchange，稍后处理）。TTL对于时间敏感的命令特别有用。
 
 ### 延迟/计划消息
 
-RabbitMQ通过使用一个插件来支持延迟/计划消息。在message exchange启用此插件后，生产者可以将消息发送到RabbitMQ，生产者可以延迟RabbitMQ路由消息到消费者队列的时间。
+RabbitMQ通过一个插件来支持延迟/计划消息。在message exchange上启用此插件后，生产者可以发送消息到RabbitMQ，生产者可以延迟RabbitMQ将消息路由到消费者队列的时间。此功可使开发人员设置将来执行的命令。例如，当生产者达到限流规则，我们可能希望将特定命令延迟到以后执行。
+
+Kafka不支持此类功能，当消息到达时会被写入到分区，供消费者立即使用。此外，Kafka不提供消息的TTL机制，尽管我们可以在应用程序级别实现。
+
+我们还必须记住，Kafka分区是仅追加事务日志。因此，它无法操作消息时间（或分区内消息的位置）。
+
+**优胜者**
+
+RabbitMQ赢得了此殊荣，因为Kafka的实现机制限制了此功能。
 
 
+## 消息保留(Message retention)
 
+一旦消费者成功消费了消息，RabbitMQ便立即将其从存储中逐出。这种行为不能被修改，这几乎是所有消息代理设计的一部分。
+
+相比之下，Kafka会按设计持久保留所有消息，直到每个topic设置的超时期限。关于消息保留，Kafka并不关心消费者的消费状态，因为它充当消息日志。消费者可以消费任意数量的消息，并且可以通过操纵分区偏移量"及时"往返。。Kakfa会定期审查topic中消息的存在时长，并逐出足够久的消息。
+
+Kafka的性能与存储容量无关。因此，从理论上讲，可以无限制的存储消息而不会影响性能（只要你的节点足够大以存储这些分区）。
+
+> Kafka的性能与存储容量无关的理解，由于kafka数据会存入到分区，分区是一个文件夹，数据实际上是存入segment，而Kafka的每个segment大小为：log.segment.bytes (默认: 1GB)；Kafka查找消息时，首先定位segment，然后在segment里取数据，因此存储容量大小对kafka的性能影响很小。
+
+**优胜者**
+
+Kafka旨在保留消息，而RabbitMQ则不保留。这里不存在竞争，因此Kafka是获胜者。
